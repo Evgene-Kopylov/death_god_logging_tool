@@ -34,5 +34,23 @@ fn main() {
 }
 
 ```
+```console
+   Compiling death_god_logging_tool v1.0.3 (/home/death/my_projects/death_god_logging_tool/logging)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.55s
+     Running `target/debug/death_god_logging_tool`
+INFO   LOG_LEVEL=trace    
+  --> src/logging_config.rs:54    2024-03-28T02:43:51
+DEBUG  LOG                               
+  --> src/main.rs:8    2024-03-28T02:43:51
+INFO   INFO                              
+  --> src/main.rs:9    2024-03-28T02:43:51
+WARN   WARN                              
+  --> src/main.rs:10    2024-03-28T02:43:51
+ERROR  ERROR                             
+  --> src/main.rs:11    2024-03-28T02:43:51
+[Finished running. Exit status: 0]
+
+```
+
 
 ![img.png](img.png)
