@@ -1,0 +1,19 @@
+[package]
+name = "death_god_logging_tool"
+version = "1.0.0"
+edition = "2021"
+#description = "My awesome lovelly logging. With colors and code links."
+description = "Настройка логирования с навигацией по коду."
+license = "GNU v3"
+
+
+[lib]
+name = "death_god_logging_tool"
+path = "src/lib.rs"
+
+
+[dependencies]
+chrono = "0.4.34"
+colored = "2.1.0"
+env_logger = "0.11.2"
+log = "0.4.21"
