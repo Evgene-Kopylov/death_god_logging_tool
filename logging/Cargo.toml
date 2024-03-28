@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2021"
 #description = "My awesome lovelly logging. With colors and code links."
 description = "Настройка логирования с навигацией по коду."
-license = "GNU v3"
+license = "GPL-3.0-only"
 
 
 [lib]
