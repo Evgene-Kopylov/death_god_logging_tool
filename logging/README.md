@@ -16,3 +16,21 @@
 LOG_LEVEL=info,<your_app>=trace
 ```
 И использовать `log::trace!()` для отслеживания событий только в указанном проекте.
+
+### Пример
+
+```rust
+use death_god_logging_tool::logging_config::logging_config;
+
+fn main() {
+    std::env::set_var("LOG_LEVEL", "trace");
+
+    logging_config("LOG_LEVEL");
+
+    log::debug!("LOG");
+    log::info!("INFO");
+    log::warn!("WARN");
+    log::error!("ERROR");
+}
+
+```

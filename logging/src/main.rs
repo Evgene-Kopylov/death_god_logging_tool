@@ -1,15 +1,12 @@
 use death_god_logging_tool::logging_config::logging_config;
 
-pub const VAR_NAME: &str = "LOG_LEVEL";
-
 fn main() {
-    std::env::set_var(VAR_NAME, "trace");
+    std::env::set_var("LOG_LEVEL", "trace");
 
-    logging_config(VAR_NAME);
+    logging_config("LOG_LEVEL");
 
     log::debug!("LOG");
     log::info!("INFO");
     log::warn!("WARN");
     log::error!("ERROR");
-    log::trace!("long INFO ===================== ==================== =========================----------------------====================");
 }
