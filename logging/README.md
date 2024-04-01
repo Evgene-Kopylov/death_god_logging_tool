@@ -25,11 +25,19 @@ LOG_FILE_PATH=/data/logs.txt
 
 ### Пример
 
+```toml
+# Cargo.toml
+
+[dependencies]
+death_god_logging_tool = "1.x.x"
+log = "x.x.x"
+```
+
 ```rust
 use death_god_logging_tool::logging_config::logging_config;
 
 fn main() {
-    std::env::set_var("LOG_LEVEL", "trace");
+    std::env::set_var("LOG_LEVEL", "info,app=trace");
     // std::env::set_var("LOG_FILE_PATH", "/data/logs.txt");  // АБСОЛЮТНЫЙ путь.
 
     logging_config();
