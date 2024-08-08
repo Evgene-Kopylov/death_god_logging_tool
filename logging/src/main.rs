@@ -1,13 +1,24 @@
-use death_god_logging_tool::logging_config::logging_config;
+use death_god_logging_tool::conflog;
 
 fn main() {
-    std::env::set_var("LOG_LEVEL", "trace");
-    // std::env::set_var("LOG_FILE_PATH", "./logs.txt");
+    // Print logs
+    std::env::set_var("LOG_LEVEL", "error,death_god_logging_tool=debug");
 
-    logging_config();
+    conflog::init();
 
-    log::debug!("LOG");
-    log::info!("INFO");
-    log::warn!("WARN");
-    log::error!("ERROR");
+    log::debug!("LOG - принт");
+    log::info!("INFO - принт");
+    log::warn!("WARN - принт");
+    log::error!("ERROR - принт");
+
+    // Save logs to file. No print
+    std::env::set_var("LOG_FILE_PATH", "./logs.txt");
+
+    conflog::init();
+
+    log::debug!("LOG - записть в лог-файл");
+    log::info!("INFO - записть в лог-файл");
+    log::warn!("WARN - записть в лог-файл");
+    log::error!("ERROR - записть в лог-файл");
+
 }

@@ -3,7 +3,7 @@ use env_logger;
 use std::fs::OpenOptions;
 use std::io::Write;
 
-pub fn logging_config() {
+pub fn init() {
     let var_name = "LOG_LEVEL";
     let mut builder = env_logger::Builder::new();
     builder
