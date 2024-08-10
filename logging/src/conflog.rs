@@ -7,6 +7,8 @@ pub fn init() {
     let var_name = "LOG_LEVEL";
     let mut builder = env_logger::Builder::new();
     builder
+        // Формирование сообщения здесь
+        // окраска
         .format(|buf, record| {
             let level_str = match record.level() {
                 log::Level::Trace => "TRACE".purple(),
@@ -16,8 +18,10 @@ pub fn init() {
                 log::Level::Error => "ERROR".red(),
             };
 
-            let level_str = format!("{:<width$}", level_str, width = 5).dimmed();
+            // выравнивание
+            let level_str = format!("\n{:<width$}", level_str, width = 5).dimmed();
 
+            // собрать вместе
             writeln!(
                 buf,
                 "{}  {}    {}    {}",

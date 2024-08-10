@@ -38,13 +38,6 @@ fn main() {
     // Print logs
     std::env::set_var("LOG_LEVEL", "error,death_god_logging_tool=debug");
 
-    conflog::init();
-
-    log::debug!("LOG - принт");
-    log::info!("INFO - принт");
-    log::warn!("WARN - принт");
-    log::error!("ERROR - принт");
-
     // Save logs to file. No print
     std::env::set_var("LOG_FILE_PATH", "./logs.txt");
 
@@ -59,20 +52,17 @@ fn main() {
 
 ```
 ```console
-   Compiling death_god_logging_tool v1.0.3 (/home/death/my_projects/death_god_logging_tool/logging)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.55s
-     Running `target/debug/death_god_logging_tool`
-INFO   LOG_LEVEL=trace    
-  --> src/logging_config.rs:54    2024-03-28T02:43:51
-DEBUG  LOG                               
-  --> src/main.rs:8    2024-03-28T02:43:51
-INFO   INFO                              
-  --> src/main.rs:9    2024-03-28T02:43:51
-WARN   WARN                              
-  --> src/main.rs:10    2024-03-28T02:43:51
-ERROR  ERROR                             
-  --> src/main.rs:11    2024-03-28T02:43:51
-[Finished running. Exit status: 0]
+DEBUG  LOG - принт                       
+  --> src/main.rs:9    2024-08-10T08:16:54
+
+INFO   INFO - принт                      
+  --> src/main.rs:10    2024-08-10T08:16:54
+
+WARN   WARN - принт                      
+  --> src/main.rs:11    2024-08-10T08:16:54
+
+ERROR  ERROR - принт                     
+  --> src/main.rs:12    2024-08-10T08:16:54
 
 ```
 
