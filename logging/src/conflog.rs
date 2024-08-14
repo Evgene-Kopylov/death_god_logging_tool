@@ -1,7 +1,6 @@
 use colored::*;
 use env_logger;
 // use std::fs::OpenOptions;
-use std::io::Write;
 use flexi_logger::{Age, Cleanup, Criterion, Duplicate, FileSpec, Logger, Naming};
 
 pub fn init() {
@@ -93,8 +92,7 @@ pub fn init() {
                     "{}  {}    {}    {}",
                     level_str,
                     format_pprinted_string(
-                        record.target()
-                            .to_string(), 30),
+                        record.args().to_string(), 30),
                     format!(
                         "\n  --> {}:{}",
                         record.file().unwrap_or("unknown"),
