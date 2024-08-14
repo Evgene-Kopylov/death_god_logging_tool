@@ -57,6 +57,29 @@ pub fn init() {
                 flexi_logger::Naming::Numbers,
                 flexi_logger::Cleanup::KeepLogFiles(7),
             )
+            .format_for_files(|buf, _now, record| {
+                // выравнивание
+                let level_str = format!("{:<width$}", record.level(), width = 5);
+                // .dimmed();
+
+                // собрать вместе
+                writeln!(
+                    buf,
+                    "{}  {}    {}    {}",
+                    level_str,
+                    format_pprinted_string(record.args().to_string(), 30),
+                    format!(
+                        "\n  --> {}:{}",
+                        record.file().unwrap_or("unknown"),
+                        record.line().unwrap_or(0)
+                    ),
+                        // .blue(),
+                    chrono::Local::now()
+                        .format("%Y-%m-%dT%H:%M:%S")
+                        .to_string()
+                        // .dimmed(),
+                )
+            })
             .start()
             .unwrap();
     } else {
@@ -67,7 +90,7 @@ pub fn init() {
         "{}={}",
         log_level.clone().blue(),
         std::env::var("LOG_LEVEL")
-            .unwrap_or("<Переменная LOG_LEVEL не определена. по умолчанию 'info'>".to_string())
+            .unwrap_or("<Переменная LOG_LEVEL не определена.>".to_string())
             .green(),
     );
 }
