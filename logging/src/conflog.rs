@@ -19,7 +19,7 @@ pub fn init() {
             };
 
             // выравнивание
-            let level_str = format!("\n{:<width$}", level_str, width = 5).dimmed();
+            let level_str = format!("{:<width$}", level_str, width = 5).dimmed();
 
             // собрать вместе
             writeln!(
