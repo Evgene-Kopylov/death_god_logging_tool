@@ -44,13 +44,13 @@ pub fn init() {
     let log_level = std::env::var("LOG_LEVEL")
         .unwrap_or("info".to_string());
 
-    if let Ok(value) = std::env::var("LOG_DIRECTORY_PATH") {
-        println!("LOG_FILE_PATH={:?}", value);
+    if let Ok(path) = std::env::var("LOG_DIRECTORY_PATH") {
+        println!("LOG_FILE_PATH={:?}", path);
         println!("LOG_LEVEL={:?}", log_level);
         Logger::try_with_str(log_level.clone())
             .unwrap()
             .log_to_file(
-                flexi_logger::FileSpec::default().directory("logs"),
+                flexi_logger::FileSpec::default().directory(path),
             )
             .rotate(
                 flexi_logger::Criterion::Age(Age::Day),
@@ -80,11 +80,8 @@ pub fn init() {
     }
 
     log::info!(
-        "{}={}",
-        log_level.clone().blue(),
-        std::env::var("LOG_LEVEL")
-            .unwrap_or("<Переменная LOG_LEVEL не определена.>".to_string())
-            .green(),
+        "LOG_LEVEL={}",
+        log_level.clone()
     );
 }
 
