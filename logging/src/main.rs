@@ -12,5 +12,4 @@ fn main() {
     log::info!("INFO - записть в лог-файл");
     log::warn!("WARN - записть в лог-файл");
     log::error!("ERROR - записть в лог-файл");
-
 }

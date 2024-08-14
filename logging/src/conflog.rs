@@ -2,17 +2,45 @@ use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
 
 pub fn init() {
-    let log_level = std::env::var("LOG_LEVEL")
-        .unwrap_or("info".to_string());
+    let log_level = std::env::var("LOG_LEVEL").unwrap_or("info".to_string());
 
-    let path = std::env::var("LOG_PATH")
-        .unwrap_or("logs".to_string());
+    let logger = Logger::try_with_str(log_level.clone())
+        .unwrap()
+        .duplicate_to_stderr(Duplicate::All)
+        .format_for_stderr(|buf, _now, record| {
+            let level_str = match record.level() {
+                log::Level::Trace => "TRACE".purple(),
+                log::Level::Debug => "DEBUG".blue(),
+                log::Level::Info => "INFO".green(),
+                log::Level::Warn => "WARN".yellow(),
+                log::Level::Error => "ERROR".red(),
+            };
 
-        Logger::try_with_str(log_level.clone())
-            .unwrap()
-            .log_to_file(
-                flexi_logger::FileSpec::default().directory(path),
+            // выравнивание
+            let level_str = format!("{:<width$}", level_str, width = 5).dimmed();
+
+            // собрать вместе
+            writeln!(
+                buf,
+                "{}  {}    {}    {}",
+                level_str,
+                format_pprinted_string(record.args().to_string(), 30),
+                format!(
+                    "\n  --> {}:{}",
+                    record.file().unwrap_or("unknown"),
+                    record.line().unwrap_or(0)
+                )
+                .blue(),
+                chrono::Local::now()
+                    .format("%Y-%m-%dT%H:%M:%S")
+                    .to_string()
+                    .dimmed(),
             )
+        });
+
+    if let Some(path) = std::env::var("LOG_PATH").ok() {
+        logger
+            .log_to_file(flexi_logger::FileSpec::default().directory(path))
             .rotate(
                 flexi_logger::Criterion::Age(Age::Day),
                 flexi_logger::Naming::Numbers,
@@ -29,50 +57,16 @@ pub fn init() {
                         record.file().unwrap_or("unknown"),
                         record.line().unwrap_or(0)
                     ),
-                    chrono::Local::now()
-                        .format("%Y-%m-%dT%H:%M:%S")
-                        .to_string()
-                )
-            })
-            .duplicate_to_stderr(Duplicate::All)
-            .format_for_stderr(|buf, _now, record| {
-                let level_str = match record.level() {
-                    log::Level::Trace => "TRACE".purple(),
-                    log::Level::Debug => "DEBUG".blue(),
-                    log::Level::Info => "INFO".green(),
-                    log::Level::Warn => "WARN".yellow(),
-                    log::Level::Error => "ERROR".red(),
-                };
-
-                // выравнивание
-                let level_str = format!("{:<width$}", level_str, width = 5).dimmed();
-
-                // собрать вместе
-                writeln!(
-                    buf,
-                    "{}  {}    {}    {}",
-                    level_str,
-                    format_pprinted_string(
-                        record.args().to_string(), 30),
-                    format!(
-                        "\n  --> {}:{}",
-                        record.file().unwrap_or("unknown"),
-                        record.line().unwrap_or(0)
-                    )
-                        .blue(),
-                    chrono::Local::now()
-                        .format("%Y-%m-%dT%H:%M:%S")
-                        .to_string()
-                        .dimmed(),
+                    chrono::Local::now().format("%Y-%m-%dT%H:%M:%S").to_string()
                 )
             })
             .start()
             .unwrap();
+    } else {
+        logger.start().unwrap();
+    }
 
-    log::info!(
-        "LOG_LEVEL={}",
-        log_level.clone()
-    );
+    log::info!("LOG_LEVEL={}", log_level.clone());
 }
 
 fn format_pprinted_string(original_string: String, desired_length: usize) -> String {
