@@ -4,18 +4,10 @@ fn main() {
     // Print logs
     std::env::set_var("LOG_LEVEL", "error,death_god_logging_tool=debug");
 
-    // conflog::init();
-
-    // log::debug!("LOG - принт");
-    // log::info!("INFO - принт");
-    // log::warn!("WARN - принт");
-    // log::error!("ERROR - принт");
-
-    // Save logs to file. No print
-    std::env::set_var("LOG_FILE_PATH", "./logs.txt");
-
+    std::env::set_var("LOG_PATH", "/home/death/Documents/death_god_logging_tool/logsSS");
     conflog::init();
 
+    log::trace!("TRACE - записть в лог-файл");
     log::debug!("LOG - записть в лог-файл");
     log::info!("INFO - записть в лог-файл");
     log::warn!("WARN - записть в лог-файл");
