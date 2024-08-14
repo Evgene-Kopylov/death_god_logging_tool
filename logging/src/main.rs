@@ -4,7 +4,7 @@ fn main() {
     // Print logs
     std::env::set_var("LOG_LEVEL", "error,death_god_logging_tool=debug");
 
-    std::env::set_var("LOG_PATH", "/home/death/Documents/death_god_logging_tool/logsSS");
+    std::env::set_var("LOG_PATH", "logs");
     conflog::init();
 
     log::trace!("TRACE - записть в лог-файл");

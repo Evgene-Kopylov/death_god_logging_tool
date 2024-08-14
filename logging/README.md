@@ -16,9 +16,10 @@ LOG_LEVEL=warn,<your_app>=trace
 ```
 
 
-Если указан абсолютный путь к лог файлу, запись будет производиться в него.
+Путь к директории для логов, по-умолчанию "logs".
+Настроена ротация. По дням и 
 ```bash
-LOG_FILE_PATH=/data/logs.txt
+LOG_PATH=logs/
 ```
 
 ### Пример
@@ -31,26 +32,8 @@ death_god_logging_tool = "1.x.x"
 log = "x.x.x"
 ```
 
-```rust
-use death_god_logging_tool::conflog;
+Example: [main.rs](src%2Fmain.rs)
 
-fn main() {
-    // Print logs
-    std::env::set_var("LOG_LEVEL", "error,death_god_logging_tool=debug");
-
-    // Save logs to file. No print
-    std::env::set_var("LOG_FILE_PATH", "./logs.txt");
-
-    conflog::init();
-
-    log::debug!("LOG - записть в лог-файл");
-    log::info!("INFO - записть в лог-файл");
-    log::warn!("WARN - записть в лог-файл");
-    log::error!("ERROR - записть в лог-файл");
-
-}
-
-```
 ```console
 DEBUG  LOG - принт                       
   --> src/main.rs:9    2024-08-10T08:16:54
