@@ -19,7 +19,7 @@ pub fn init() {
             };
 
             // выравнивание
-            let level_str = format!("{:<width$}", level_str, width = 5).dimmed();
+            let level_str = format!("\n{:<width$}", level_str, width = 5).dimmed();
 
             // собрать вместе
             writeln!(
@@ -58,26 +58,19 @@ pub fn init() {
                 flexi_logger::Cleanup::KeepLogFiles(7),
             )
             .format_for_files(|buf, _now, record| {
-                // выравнивание
-                let level_str = format!("{:<width$}", record.level(), width = 5);
-                // .dimmed();
-
                 // собрать вместе
                 writeln!(
                     buf,
-                    "{}  {}    {}    {}",
-                    level_str,
+                    "{}    {}    {}",
                     format_pprinted_string(record.args().to_string(), 30),
                     format!(
                         "\n  --> {}:{}",
                         record.file().unwrap_or("unknown"),
                         record.line().unwrap_or(0)
                     ),
-                        // .blue(),
                     chrono::Local::now()
                         .format("%Y-%m-%dT%H:%M:%S")
                         .to_string()
-                        // .dimmed(),
                 )
             })
             .start()
