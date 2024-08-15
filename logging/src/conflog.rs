@@ -47,10 +47,15 @@ pub fn init() {
                 flexi_logger::Cleanup::KeepLogFiles(7),
             )
             .format_for_files(|buf, _now, record| {
+
+                // выравнивание
+                let level_str = format!("{:<width$}", record.level(), width = 5);
+
                 // собрать вместе
                 writeln!(
                     buf,
-                    "{}    {}    {}",
+                    "{}  {}    {}    {}",
+                    level_str,
                     format_pprinted_string(record.args().to_string(), 30),
                     format!(
                         "\n  --> {}:{}",

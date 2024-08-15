@@ -1,6 +1,6 @@
 [package]
 name = "death_god_logging_tool"
-version = "3.0.0"
+version = "3.0.1"
 edition = "2021"
 description = "My awesome lovelly logging. With colors and code links. (Настройка логирования с навигацией по коду)"
 license = "GPL-3.0-only"
