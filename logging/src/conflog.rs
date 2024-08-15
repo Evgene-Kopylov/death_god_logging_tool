@@ -1,9 +1,7 @@
 use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
 
-pub fn init() {
-    let log_level = std::env::var("LOG_LEVEL").unwrap_or("info".to_string());
-
+pub fn init(log_level: String, log_path: Option<String>) {
     let logger = Logger::try_with_str(log_level.clone())
         .unwrap()
         .duplicate_to_stderr(Duplicate::All)
@@ -38,7 +36,7 @@ pub fn init() {
             )
         });
 
-    if let Some(path) = std::env::var("LOG_PATH").ok() {
+    if let Some(path) = log_path {
         logger
             .log_to_file(flexi_logger::FileSpec::default().directory(path))
             .rotate(
