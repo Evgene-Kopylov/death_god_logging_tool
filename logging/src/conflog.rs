@@ -1,9 +1,9 @@
 use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
+use crate::errors::Error;
 
-pub fn init(log_level: String, log_path: Option<String>) {
-    let logger = Logger::try_with_str(log_level.clone())
-        .unwrap()
+pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
+    let logger = Logger::try_with_str(log_level.clone())?
         .duplicate_to_stderr(Duplicate::All)
         .format_for_stderr(|buf, _now, record| {
             let level_str = match record.level() {
@@ -63,13 +63,13 @@ pub fn init(log_level: String, log_path: Option<String>) {
                     chrono::Local::now().format("%Y-%m-%dT%H:%M:%S").to_string()
                 )
             })
-            .start()
-            .unwrap();
+            .start()?;
     } else {
-        logger.start().unwrap();
+        logger.start()?;
     }
 
     log::info!("LOG_LEVEL={}", log_level.clone());
+    Ok(())
 }
 
 fn format_pprinted_string(original_string: String, desired_length: usize) -> String {
