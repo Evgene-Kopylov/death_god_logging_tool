@@ -49,18 +49,22 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                 // выравнивание
                 let level_str = format!("{:<width$}", record.level(), width = 5);
 
+                let text_1 = format_pprinted_string(record.args().to_string(), 30);
+
+                let text_2 =  format!(
+                    "\n  --> {}:{}",
+                    record.file().unwrap_or("unknown"),
+                    record.line().unwrap_or(0)
+                );
+
                 // собрать вместе
                 writeln!(
                     buf,
                     "{}  {}    {}    {}",
                     level_str,
-                    format_pprinted_string(record.args().to_string(), 30),
-                    format!(
-                        "\n  --> {}:{}",
-                        record.file().unwrap_or("unknown"),
-                        record.line().unwrap_or(0)
-                    ),
-                    chrono::Local::now().format("%Y-%m-%dT%H:%M:%S").to_string()
+                    text_1,
+                    text_2,
+                    chrono::Local::now().format("%Y-%m-%dT%H:%M:%S")
                 )
             })
             .start()?;
