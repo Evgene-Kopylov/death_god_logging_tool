@@ -13,8 +13,7 @@ impl From<Box<dyn std::error::Error>> for Error {
 }
 
 impl From<FlexiLoggerError> for Error {
-    fn from(value: FlexiLoggerError) -> Self {
-        log::error!("{:?}", value);
+    fn from(_value: FlexiLoggerError) -> Self {
         Error::FlexiLoggerError
     }
 }
