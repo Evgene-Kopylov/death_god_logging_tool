@@ -1,6 +1,6 @@
 use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
-use crate::errors::Error;
+use anyhow::Error;
 
 pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
     let logger = Logger::try_with_str(log_level.clone())?

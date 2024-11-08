@@ -1,6 +1,6 @@
 [package]
 name = "death_god_logging_tool"
-version = "4.0.2"
+version = "4.0.3"
 edition = "2021"
 description = "My awesome lovelly logging. With colors and code links. (Настройка логирования с навигацией по коду)"
 license = "GPL-3.0-only"
@@ -12,6 +12,7 @@ path = "src/lib.rs"
 
 
 [dependencies]
+anyhow = "1.0.93"
 chrono = "0.4"
 colored = "2"
 flexi_logger = "0.28.5"
