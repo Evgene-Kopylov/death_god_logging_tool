@@ -45,7 +45,7 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
             Some(s) => s,
             None => "Box<Any>",
         };
-        log::error!("Panic occurred: {}\n  --> {}:{}", message, location.file(), location.line());
+        log::error!("Panic: {}\n  --> {}:{}", message, location.file(), location.line());
         original_panic_hook(info);
     }));
 
