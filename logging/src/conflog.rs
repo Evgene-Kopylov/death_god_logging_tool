@@ -1,3 +1,4 @@
+use std::panic;
 use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
 use anyhow::Error;
@@ -35,6 +36,18 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                     .dimmed(),
             )
         });
+
+    // Hook panics.
+    let original_panic_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |info| {
+        let location = info.location().unwrap();
+        let message = match info.payload().downcast_ref::<&str>() {
+            Some(s) => s,
+            None => "Box<Any>",
+        };
+        log::error!("Panic occurred: {}\n  --> {}:{}", message, location.file(), location.line());
+        original_panic_hook(info);
+    }));
 
     if let Some(path) = log_path {
         logger
