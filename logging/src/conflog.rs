@@ -1,4 +1,3 @@
-use std::panic;
 use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
 use anyhow::Error;
