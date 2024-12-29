@@ -37,32 +37,6 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
             )
         });
 
-    // Установка хуков паники
-    let original_panic_hook = panic::take_hook();
-    panic::set_hook(Box::new(move |info| {
-        let location = info.location().unwrap_or_else(|| {
-            panic!("Не удалось получить местоположение паники");
-        });
-        
-        let message = match info.payload().downcast_ref::<&str>() {
-            Some(s) => s.to_string(),
-            None => format!("{:?}", info.payload()), // использование формата Debug для неизвестных типов
-        };
-
-        log::error!(
-            "Паника: {} на {}:{}",
-            message,
-            location.file(),
-            location.line()
-        );
-
-        // Опционально: Логирование трассировки, если доступно
-        let backtrace = std::backtrace::Backtrace::force_capture();
-        log::debug!("Backtrace:\n{:?}", backtrace);
-
-        original_panic_hook(info); // Вызов оригинального хука паники
-    }));
-
     if let Some(path) = log_path {
         logger
             .log_to_file(flexi_logger::FileSpec::default().directory(path))
