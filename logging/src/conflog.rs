@@ -3,16 +3,8 @@ use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
 #[cfg(unix)]
 use libc;
-use std::fs::{create_dir_all, read_dir, OpenOptions};
 #[cfg(unix)]
 use std::os::unix::io::AsRawFd;
-#[cfg(windows)]
-use std::os::windows::io::AsRawHandle;
-use std::path::Path;
-#[cfg(windows)]
-use winapi::um::processenv;
-#[cfg(windows)]
-use winapi::um::winbase;
 
 pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
     let logger = Logger::try_with_str(log_level.clone())?
