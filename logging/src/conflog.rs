@@ -44,7 +44,10 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
         #[cfg(unix)]
         {
             // Запускаем логгер только для stderr (без записи в файл)
-            use std::{fs::{create_dir_all, OpenOptions}, path::Path};
+            use std::{
+                fs::{create_dir_all, OpenOptions},
+                path::Path,
+            };
             logger.start()?;
 
             // гарантируем, что директория логов существует
