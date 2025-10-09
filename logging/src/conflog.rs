@@ -1,6 +1,8 @@
 use anyhow::Error;
 use colored::*;
-use flexi_logger::{Age, Duplicate, Logger};
+use flexi_logger::{Duplicate, Logger};
+#[cfg(windows)]
+use flexi_logger::Age;
 #[cfg(unix)]
 use libc;
 #[cfg(unix)]
