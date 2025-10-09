@@ -44,9 +44,9 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
         #[cfg(unix)]
         {
             // Запускаем логгер только для stderr (без записи в файл)
+            use std::{fs::{create_dir_all, OpenOptions}, path::Path};
             logger.start()?;
 
-            // Создаем кастомную ротацию файлов
             // гарантируем, что директория логов существует
             create_dir_all(&path)?;
 
@@ -57,6 +57,8 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
             // Проверяем, существует ли CURRENT файл
             if Path::new(&current_file).exists() {
                 // Находим все существующие файлы с номерами
+
+                use std::fs::read_dir;
                 let mut log_files: Vec<(i32, String)> = Vec::new();
 
                 for entry in read_dir(&path)? {
