@@ -82,29 +82,23 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
             // гарантируем, что директория логов существует
             create_dir_all(&path)?;
 
-            let stdout_file_path = format!("{}/console.out.{}.log", &path, ts);
-            let stderr_file_path = format!("{}/console.err.{}.log", &path, ts);
+            let console_file_path = format!("{}/console.{}.log", &path, ts);
 
-            let stdout_file = OpenOptions::new()
+            let console_file = OpenOptions::new()
                 .create(true)
                 .append(true)
-                .open(&stdout_file_path)?;
-            let stderr_file = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&stderr_file_path)?;
+                .open(&console_file_path)?;
 
             unsafe {
-                if libc::dup2(stdout_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
+                if libc::dup2(console_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
                     return Err(std::io::Error::last_os_error().into());
                 }
-                if libc::dup2(stderr_file.as_raw_fd(), libc::STDERR_FILENO) == -1 {
+                if libc::dup2(console_file.as_raw_fd(), libc::STDERR_FILENO) == -1 {
                     return Err(std::io::Error::last_os_error().into());
                 }
             }
             // Закрываем оригинальные дескрипторы файлов (переназначенные stdout/stderr уже активны).
-            drop(stdout_file);
-            drop(stderr_file);
+            drop(console_file);
         }
     } else {
         logger.start()?;

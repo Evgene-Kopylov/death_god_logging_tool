@@ -17,6 +17,6 @@ fn main() {
     log::info!("i - записть в лог-файл");
     log::warn!("w - записть в лог-файл");
     log::error!("eee - записть в лог-файл");
-    // println!("print line ...");
-    // panic!("Паника!!!");
+    println!("print line ...");
+    panic!("Паника!!!");
 }
