@@ -1,6 +1,6 @@
 use anyhow::Error;
 use colored::*;
-use flexi_logger::{Duplicate, Logger};
+use flexi_logger::{Age, Duplicate, Logger};
 #[cfg(unix)]
 use libc;
 use std::fs::{create_dir_all, read_dir, OpenOptions};
@@ -49,12 +49,12 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
         });
 
     if let Some(path) = log_path {
-        // Запускаем логгер только для stderr (без записи в файл)
-        logger.start()?;
-
-        // Создаем кастомную ротацию файлов
         #[cfg(unix)]
         {
+            // Запускаем логгер только для stderr (без записи в файл)
+            logger.start()?;
+
+            // Создаем кастомную ротацию файлов
             // гарантируем, что директория логов существует
             create_dir_all(&path)?;
 
@@ -128,82 +128,40 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
         }
         #[cfg(windows)]
         {
-            // гарантируем, что директория логов существует
-            create_dir_all(&path)?;
+            logger
+                .log_to_file(flexi_logger::FileSpec::default().directory(path))
+                .rotate(
+                    flexi_logger::Criterion::Age(Age::Day),
+                    flexi_logger::Naming::Numbers,
+                    flexi_logger::Cleanup::KeepLogFiles(7),
+                )
+                .format_for_files(|buf, _now, record| {
+                    // выравнивание
+                    let level_str = format!("{:<width$}", record.level(), width = 5);
 
-            // Получаем имя пакета из Cargo.toml
-            let package_name = env!("CARGO_PKG_NAME");
-            let current_file = format!("{}/{}_rCURRENT.log", &path, package_name);
+                    let text_1 = format_pprinted_string(record.args().to_string(), 30);
 
-            // Проверяем, существует ли CURRENT файл
-            if Path::new(&current_file).exists() {
-                // Находим все существующие файлы с номерами
-                let mut log_files: Vec<(i32, String)> = Vec::new();
+                    let text_2 = format!(
+                        "\n  --> {}:{}",
+                        record.file().unwrap_or("unknown"),
+                        record.line().unwrap_or(0)
+                    );
 
-                for entry in read_dir(&path)? {
-                    let entry = entry?;
-                    let file_name = entry.file_name().to_string_lossy().to_string();
-
-                    if file_name.starts_with(&format!("{}_r", package_name))
-                        && file_name.ends_with(".log")
-                        && file_name != format!("{}_rCURRENT.log", package_name)
-                    {
-                        // Извлекаем номер из имени файла
-                        let num_part = file_name
-                            .trim_start_matches(&format!("{}_r", package_name))
-                            .trim_end_matches(".log");
-
-                        if let Ok(num) = num_part.parse::<i32>() {
-                            log_files.push((num, entry.path().to_string_lossy().to_string()));
-                        }
-                    }
-                }
-
-                // Сортируем по номерам
-                log_files.sort_by_key(|(num, _)| *num);
-
-                // Удаляем старые файлы, если их больше 4 (вместе с CURRENT будет 5)
-                while log_files.len() >= 4 {
-                    if let Some((_, oldest_file)) = log_files.pop() {
-                        std::fs::remove_file(&oldest_file)?;
-                    }
-                }
-
-                // Сдвигаем существующие файлы
-                for (num, file_path) in log_files.iter_mut().rev() {
-                    let new_num = *num + 1;
-                    let new_name = format!("{}/{}_r{:05}.log", &path, package_name, new_num);
-                    std::fs::rename(&file_path, &new_name)?;
-                }
-
-                // Переименовываем CURRENT в r00000
-                let new_name = format!("{}/{}_r{:05}.log", &path, package_name, 0);
-                std::fs::rename(&current_file, &new_name)?;
-            }
-
-            // Создаем новый CURRENT файл
-            let console_file = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&current_file)?;
-
-            // На Windows просто создаем файл и записываем базовую информацию
-            // Перенаправление потоков не работает корректно, поэтому используем альтернативный подход
-            use std::io::Write;
-            writeln!(&console_file, "=== Логирование запущено на Windows ===")?;
-            writeln!(&console_file, "LOG_LEVEL=trace")?;
-            writeln!(&console_file, "ttt - записть в лог-файл")?;
-            writeln!(&console_file, "ddd - записть в лог-файл")?;
-            writeln!(&console_file, "i - записть в лог-файл")?;
-            writeln!(&console_file, "w - записть в лог-файл")?;
-            writeln!(&console_file, "eee - записть в лог-файл")?;
-            writeln!(&console_file, "print line ...")?;
-            writeln!(&console_file, "Паника!!!")?;
+                    // собрать вместе
+                    writeln!(
+                        buf,
+                        "{}  {}    {}    {}",
+                        level_str,
+                        text_1,
+                        text_2,
+                        chrono::Local::now().format("%Y-%m-%dT%H:%M:%S")
+                    )
+                })
+                .start()?;
         }
     } else {
         logger.start()?;
     }
-
     log::info!("LOG_LEVEL={}", log_level.clone());
     Ok(())
 }
