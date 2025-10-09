@@ -1,6 +1,11 @@
 use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
 use anyhow::Error;
+use std::fs::{create_dir_all, OpenOptions};
+#[cfg(unix)]
+use std::os::unix::io::AsRawFd;
+#[cfg(unix)]
+use libc;
 
 pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
     let logger = Logger::try_with_str(log_level.clone())?
@@ -38,20 +43,19 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
 
     if let Some(path) = log_path {
         logger
-            .log_to_file(flexi_logger::FileSpec::default().directory(path))
+            .log_to_file(flexi_logger::FileSpec::default().directory(path.clone()))
             .rotate(
                 flexi_logger::Criterion::Age(Age::Day),
                 flexi_logger::Naming::Numbers,
                 flexi_logger::Cleanup::KeepLogFiles(7),
             )
             .format_for_files(|buf, _now, record| {
-
                 // выравнивание
                 let level_str = format!("{:<width$}", record.level(), width = 5);
 
                 let text_1 = format_pprinted_string(record.args().to_string(), 30);
 
-                let text_2 =  format!(
+                let text_2 = format!(
                     "\n  --> {}:{}",
                     record.file().unwrap_or("unknown"),
                     record.line().unwrap_or(0)
@@ -68,6 +72,40 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                 )
             })
             .start()?;
+
+        // Дополнительно перенаправляем весь консольный вывод (stdout и stderr) в файлы.
+        // Это позволит записывать любой вывод println!/eprintln!, паники и т.д.
+        #[cfg(unix)]
+        {
+            let ts = chrono::Local::now().format("%Y-%m-%dT%H-%M-%S").to_string();
+
+            // гарантируем, что директория логов существует
+            create_dir_all(&path)?;
+
+            let stdout_file_path = format!("{}/console.out.{}.log", &path, ts);
+            let stderr_file_path = format!("{}/console.err.{}.log", &path, ts);
+
+            let stdout_file = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&stdout_file_path)?;
+            let stderr_file = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&stderr_file_path)?;
+
+            unsafe {
+                if libc::dup2(stdout_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
+                    return Err(std::io::Error::last_os_error().into());
+                }
+                if libc::dup2(stderr_file.as_raw_fd(), libc::STDERR_FILENO) == -1 {
+                    return Err(std::io::Error::last_os_error().into());
+                }
+            }
+            // Закрываем оригинальные дескрипторы файлов (переназначенные stdout/stderr уже активны).
+            drop(stdout_file);
+            drop(stderr_file);
+        }
     } else {
         logger.start()?;
     }

@@ -6,9 +6,13 @@ fn main() {
 
     // let log_path = "logs";
     // conflog::init(log_level.to_string(), Some(log_path.to_string()));
+    println!("1");
     conflog::init("trace".to_string(), Some("logs".to_string())).ok();
+    println!("2");
 
     log::trace!("ttt - записть в лог-файл");
+    println!("3");
+    
     log::debug!("ddd - записть в лог-файл");
     log::info!("i - записть в лог-файл");
     log::warn!("w - записть в лог-файл");

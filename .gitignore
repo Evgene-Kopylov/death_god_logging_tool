@@ -16,3 +16,4 @@ Cargo.lock
 
 logs.txt
 logs/
+tmp/
