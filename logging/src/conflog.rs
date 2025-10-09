@@ -1,11 +1,11 @@
+use anyhow::Error;
 use colored::*;
 use flexi_logger::{Age, Duplicate, Logger};
-use anyhow::Error;
+#[cfg(unix)]
+use libc;
 use std::fs::{create_dir_all, OpenOptions};
 #[cfg(unix)]
 use std::os::unix::io::AsRawFd;
-#[cfg(unix)]
-use libc;
 
 pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
     let logger = Logger::try_with_str(log_level.clone())?
