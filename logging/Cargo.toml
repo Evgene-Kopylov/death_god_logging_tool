@@ -19,4 +19,6 @@ flexi_logger = "0.31.6"
 log = "0.4"
 libc = "0.2.177"
 tokio = { version = "1.39.2", features = ["full"]}
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winbase", "processenv", "handleapi"]}
 
