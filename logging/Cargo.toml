@@ -14,9 +14,9 @@ path = "src/lib.rs"
 [dependencies]
 anyhow = "1.0.93"
 chrono = "0.4"
-colored = "2"
-flexi_logger = "0.28.5"
+colored = "3.0.0"
+flexi_logger = "0.31.6"
 log = "0.4"
-libc = "0.2"
+libc = "0.2.177"
 tokio = { version = "1.39.2", features = ["full"]}
 
