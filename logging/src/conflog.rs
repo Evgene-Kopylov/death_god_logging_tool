@@ -1,7 +1,7 @@
 use anyhow::Error;
 use colored::*;
 use flexi_logger::{Duplicate, Logger};
-#[cfg(windows)]
+#[cfg(not(unix))]
 use flexi_logger::Age;
 #[cfg(unix)]
 use libc;
@@ -125,7 +125,7 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
             // Закрываем оригинальные дескрипторы файлов
             drop(console_file);
         }
-        #[cfg(windows)]
+        #[cfg(not(unix))]
         {
             logger
                 .log_to_file(flexi_logger::FileSpec::default().directory(path))
