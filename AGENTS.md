@@ -20,8 +20,3 @@ Make sure you using correct encoding.
 Для Rust: 
 - `cargo fmt`
 - `cargo test`
-
-## Контроль версий
-- Создание бэкапа: `git add <file>` + `git commit -m "backup: описание"`
-- Откат изменений: `git restore <file>`
-- Сброс индекса: `git reset <file>`
