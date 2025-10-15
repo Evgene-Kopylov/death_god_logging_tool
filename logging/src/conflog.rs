@@ -11,7 +11,7 @@ use std::os::unix::io::AsRawFd;
 pub fn init(
     log_level: String,
     log_path: Option<String>,
-    console_output: Option<bool>,
+    console_output: bool,
 ) -> Result<(), Error> {
     let logger = Logger::try_with_str(log_level.clone())?
         .duplicate_to_stderr(Duplicate::All)
@@ -116,7 +116,7 @@ pub fn init(
             }
 
             // Если включено отображение в консоли, не перенаправляем вывод
-            if console_output.unwrap_or(false) {
+            if !console_output {
                 // Просто запускаем логгер без перенаправления
                 drop(logger);
             } else {
