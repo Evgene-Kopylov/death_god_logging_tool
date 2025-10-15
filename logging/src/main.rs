@@ -8,6 +8,7 @@ fn main() {
     // conflog::init(log_level.to_string(), Some(log_path.to_string()));
     println!("1");
     // Используем новый параметр console_output для отображения в консоли
+    // Теперь имя приложения определяется автоматически из std::env::current_exe()
     conflog::init("trace".to_string(), Some("logs".to_string()), Some(true)).ok();
     println!("2");
 

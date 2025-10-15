@@ -59,9 +59,13 @@ pub fn init(
             // гарантируем, что директория логов существует
             create_dir_all(&path)?;
 
-            // Получаем имя пакета из Cargo.toml
-            let package_name = env!("CARGO_PKG_NAME");
-            let current_file = format!("{}/{}_rCURRENT.log", &path, package_name);
+            // Получаем имя исполняемого файла
+            let current_exe = std::env::current_exe()?;
+            let app_name = current_exe
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("unknown_app");
+            let current_file = format!("{}/{}_rCURRENT.log", &path, app_name);
 
             // Проверяем, существует ли CURRENT файл
             if Path::new(&current_file).exists() {
@@ -74,13 +78,13 @@ pub fn init(
                     let entry = entry?;
                     let file_name = entry.file_name().into_string().unwrap_or_default();
 
-                    if file_name.starts_with(&format!("{}_r", package_name))
+                    if file_name.starts_with(&format!("{}_r", app_name))
                         && file_name.ends_with(".log")
-                        && file_name != format!("{}_rCURRENT.log", package_name)
+                        && file_name != format!("{}_rCURRENT.log", app_name)
                     {
                         // Извлекаем номер из имени файла
                         let num_part = file_name
-                            .trim_start_matches(&format!("{}_r", package_name))
+                            .trim_start_matches(&format!("{}_r", app_name))
                             .trim_end_matches(".log");
 
                         if let Ok(num) = num_part.parse::<i32>() {
@@ -102,12 +106,12 @@ pub fn init(
                 // Сдвигаем существующие файлы
                 for (num, file_path) in log_files.iter_mut().rev() {
                     let new_num = *num + 1;
-                    let new_name = format!("{}/{}_r{:05}.log", &path, package_name, new_num);
+                    let new_name = format!("{}/{}_r{:05}.log", &path, app_name, new_num);
                     std::fs::rename(&file_path, &new_name)?;
                 }
 
                 // Переименовываем CURRENT в r00000
-                let new_name = format!("{}/{}_r{:05}.log", &path, package_name, 0);
+                let new_name = format!("{}/{}_r{:05}.log", &path, app_name, 0);
                 std::fs::rename(&current_file, &new_name)?;
             }
 
