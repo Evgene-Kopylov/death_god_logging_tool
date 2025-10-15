@@ -1,14 +1,18 @@
 use anyhow::Error;
 use colored::*;
-use flexi_logger::{Duplicate, Logger};
 #[cfg(not(unix))]
 use flexi_logger::Age;
+use flexi_logger::{Duplicate, Logger};
 #[cfg(unix)]
 use libc;
 #[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 
-pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
+pub fn init(
+    log_level: String,
+    log_path: Option<String>,
+    console_output: Option<bool>,
+) -> Result<(), Error> {
     let logger = Logger::try_with_str(log_level.clone())?
         .duplicate_to_stderr(Duplicate::All)
         .format_for_stderr(|buf, _now, record| {
@@ -42,7 +46,7 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
             )
         });
 
-    if let Some(path) = log_path {
+    if let Some(path) = log_path.clone() {
         #[cfg(unix)]
         {
             // Запускаем логгер только для stderr (без записи в файл)
@@ -50,7 +54,7 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                 fs::{create_dir_all, OpenOptions},
                 path::Path,
             };
-            logger.start()?;
+            let logger = logger.start()?;
 
             // гарантируем, что директория логов существует
             create_dir_all(&path)?;
@@ -107,23 +111,29 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                 std::fs::rename(&current_file, &new_name)?;
             }
 
-            // Создаем новый CURRENT файл
-            let console_file = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&current_file)?;
+            // Если включено отображение в консоли, не перенаправляем вывод
+            if console_output.unwrap_or(false) {
+                // Просто запускаем логгер без перенаправления
+                drop(logger);
+            } else {
+                // Создаем новый CURRENT файл и перенаправляем вывод
+                let console_file = OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(&current_file)?;
 
-            // Перенаправляем stdout и stderr в файл
-            unsafe {
-                if libc::dup2(console_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
-                    return Err(std::io::Error::last_os_error().into());
+                // Перенаправляем stdout и stderr в файл
+                unsafe {
+                    if libc::dup2(console_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
+                        return Err(std::io::Error::last_os_error().into());
+                    }
+                    if libc::dup2(console_file.as_raw_fd(), libc::STDERR_FILENO) == -1 {
+                        return Err(std::io::Error::last_os_error().into());
+                    }
                 }
-                if libc::dup2(console_file.as_raw_fd(), libc::STDERR_FILENO) == -1 {
-                    return Err(std::io::Error::last_os_error().into());
-                }
+                // Закрываем оригинальные дескрипторы файлов
+                drop(console_file);
             }
-            // Закрываем оригинальные дескрипторы файлов
-            drop(console_file);
         }
         #[cfg(not(unix))]
         {

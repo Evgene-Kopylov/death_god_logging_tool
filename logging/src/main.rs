@@ -7,7 +7,8 @@ fn main() {
     // let log_path = "logs";
     // conflog::init(log_level.to_string(), Some(log_path.to_string()));
     println!("1");
-    conflog::init("trace".to_string(), Some("logs".to_string())).ok();
+    // Используем новый параметр console_output для отображения в консоли
+    conflog::init("trace".to_string(), Some("logs".to_string()), Some(true)).ok();
     println!("2");
 
     log::trace!("ttt - записть в лог-файл");
