@@ -49,12 +49,11 @@ pub fn init(
     if let Some(path) = log_path.clone() {
         #[cfg(unix)]
         {
-            // Запускаем логгер только для stderr (без записи в файл)
+            // Подготовка файловой системы для логов
             use std::{
                 fs::{create_dir_all, OpenOptions},
                 path::Path,
             };
-            let logger = logger.start()?;
 
             // гарантируем, что директория логов существует
             create_dir_all(&path)?;
@@ -115,18 +114,17 @@ pub fn init(
                 std::fs::rename(&current_file, &new_name)?;
             }
 
-            // Если включено отображение в консоли, не перенаправляем вывод
-            if !console_output {
-                // Просто запускаем логгер без перенаправления
-                drop(logger);
-            } else {
-                // Создаем новый CURRENT файл и перенаправляем вывод
-                let console_file = OpenOptions::new()
-                    .create(true)
-                    .append(true)
-                    .open(&current_file)?;
+            // Создаем новый CURRENT файл (независимо от console_output)
+            let console_file = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&current_file)?;
 
-                // Перенаправляем stdout и stderr в файл
+            // Запускаем логгер
+            let _logger_handle = logger.start()?;
+
+            // Если отключен консольный вывод, перенаправляем stdout и stderr в файл
+            if !console_output {
                 unsafe {
                     if libc::dup2(console_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
                         return Err(std::io::Error::last_os_error().into());
@@ -135,9 +133,10 @@ pub fn init(
                         return Err(std::io::Error::last_os_error().into());
                     }
                 }
-                // Закрываем оригинальные дескрипторы файлов
-                drop(console_file);
             }
+
+            // Закрываем файловый дескриптор
+            drop(console_file);
         }
         #[cfg(not(unix))]
         {

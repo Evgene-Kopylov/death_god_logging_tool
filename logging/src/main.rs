@@ -9,7 +9,9 @@ fn main() {
     println!("1");
     // Используем новый параметр console_output для отображения в консоли
     // Теперь имя приложения определяется автоматически из std::env::current_exe()
-    conflog::init("trace".to_string(), Some("logs".to_string()), cfg!(debug_assertions)).ok();
+    let console_output = cfg!(debug_assertions);
+    println!("console_output: {}", console_output);
+    conflog::init("trace".to_string(), Some("logs".to_string()), console_output).ok();
     println!("2");
 
     log::trace!("ttt - записть в лог-файл");
