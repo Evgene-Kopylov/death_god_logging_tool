@@ -8,6 +8,9 @@ use libc;
 #[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 
+
+/// В релизе удобно задать 
+/// `console_output = cfg!(debug_assertions)`
 pub fn init(
     log_level: String,
     log_path: Option<String>,
