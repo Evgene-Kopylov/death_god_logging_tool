@@ -1,17 +1,16 @@
 use death_god_logging_tool::conflog;
 
 fn main() {
-    // Print logs
-    // let log_level = "error,death_god_logging_tool=debug";
-
-    // let log_path = "logs";
-    // conflog::init(log_level.to_string(), Some(log_path.to_string()));
-    println!("1");
     // Используем новый параметр console_output для отображения в консоли
     // Теперь имя приложения определяется автоматически из std::env::current_exe()
     let console_output = cfg!(debug_assertions);
     println!("console_output: {}", console_output);
-    conflog::init("trace".to_string(), Some("logs".to_string()), console_output).ok();
+    conflog::init(
+        "trace".to_string(),
+        Some("logs".to_string()),
+        console_output,
+    )
+    .ok();
     println!("2");
 
     log::trace!("ttt - записть в лог-файл");
