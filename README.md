@@ -111,11 +111,8 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 Для проверки работы логирования:
 
 ```bash
-# Сборка релизной версии
-cargo build --release
-
 # Запуск тестового скрипта
-python3 test_logging.py
+cargo build --release; python test_logging.py
 ```
 
 Скрипт проверит:
