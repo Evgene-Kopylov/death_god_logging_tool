@@ -1,6 +1,6 @@
 [package]
 name = "death_god_logging_tool"
-version = "5.1.0"
+version = "5.1.1"
 edition = "2021"
 description = "My awesome lovelly logging. With colors and code links. (Настройка логирования с навигацией по коду)"
 license = "GPL-3.0-only"
@@ -13,12 +13,12 @@ path = "src/lib.rs"
 
 [dependencies]
 anyhow = "1.0.93"
-chrono = "0.4"
+chrono = "0.4.43"
 colored = "3.0.0"
-flexi_logger = "0.31.6"
-log = "0.4"
-libc = "0.2.177"
-tokio = { version = "1.39.2", features = ["full"]}
+flexi_logger = "0.31.8"
+log = "0.4.29"
+libc = "0.2.180"
+tokio = { version = "1.49.0", features = ["full"]}
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winbase", "processenv", "handleapi"]}
 
