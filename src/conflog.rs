@@ -30,7 +30,7 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                 level_str,
                 format_pprinted_string(record.args().to_string(), 30),
                 format!(
-                    "  --> {}:{}",
+                    "\n  --> {}:{}",
                     record.file().unwrap_or("unknown"),
                     record.line().unwrap_or(0)
                 )
