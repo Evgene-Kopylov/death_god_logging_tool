@@ -1,14 +1,18 @@
 use anyhow::Error;
 use colored::*;
-use flexi_logger::{Duplicate, Logger};
 #[cfg(not(unix))]
 use flexi_logger::Age;
+use flexi_logger::{Duplicate, Logger};
 #[cfg(unix)]
 use libc;
 #[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 
-pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
+pub fn init(
+    log_level: String,
+    log_path: Option<String>,
+    duplicate_to_console: bool,
+) -> Result<(), Error> {
     let logger = Logger::try_with_str(log_level.clone())?
         .duplicate_to_stderr(Duplicate::All)
         .format_for_stderr(|buf, _now, record| {
@@ -113,15 +117,78 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                 .append(true)
                 .open(&current_file)?;
 
-            // Перенаправляем stdout и stderr в файл
-            // ВНИМАНИЕ: после этого весь вывод (println!, eprintln!, логи) будет идти только в файл
-            // Для дублирования вывода в консоль нужна дополнительная реализация
-            unsafe {
-                if libc::dup2(console_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
-                    return Err(std::io::Error::last_os_error().into());
+            if duplicate_to_console {
+                // Сохраняем оригинальные дескрипторы для дублирования вывода
+                let original_stdout = unsafe { libc::dup(libc::STDOUT_FILENO) };
+                let original_stderr = unsafe { libc::dup(libc::STDERR_FILENO) };
+
+                // Создаем пайп для перехвата вывода
+                let mut pipe_fds: [libc::c_int; 2] = [0; 2];
+                unsafe {
+                    if libc::pipe(pipe_fds.as_mut_ptr()) == -1 {
+                        return Err(std::io::Error::last_os_error().into());
+                    }
                 }
-                if libc::dup2(console_file.as_raw_fd(), libc::STDERR_FILENO) == -1 {
-                    return Err(std::io::Error::last_os_error().into());
+
+                // Перенаправляем stdout и stderr в пайп
+                unsafe {
+                    if libc::dup2(pipe_fds[1], libc::STDOUT_FILENO) == -1 {
+                        return Err(std::io::Error::last_os_error().into());
+                    }
+                    if libc::dup2(pipe_fds[1], libc::STDERR_FILENO) == -1 {
+                        return Err(std::io::Error::last_os_error().into());
+                    }
+                    libc::close(pipe_fds[1]);
+                }
+
+                // Запускаем поток для чтения из пайпа и записи в файл и консоль
+                // Нужно сохранить владение файлом, чтобы он не закрылся
+                let current_file_clone = current_file.clone();
+                std::thread::spawn(move || {
+                    let mut buffer = [0u8; 4096];
+                    loop {
+                        unsafe {
+                            let bytes_read = libc::read(
+                                pipe_fds[0],
+                                buffer.as_mut_ptr() as *mut _,
+                                buffer.len(),
+                            );
+                            if bytes_read <= 0 {
+                                break;
+                            }
+
+                            // Записываем в файл
+                            let slice = &buffer[0..bytes_read as usize];
+                            use std::io::Write;
+                            let _ = std::fs::OpenOptions::new()
+                                .create(true)
+                                .append(true)
+                                .open(&current_file_clone)
+                                .and_then(|mut f| f.write_all(slice));
+
+                            // Записываем в оригинальную консоль
+                            let _ = libc::write(
+                                original_stdout,
+                                buffer.as_ptr() as *const _,
+                                bytes_read as usize,
+                            );
+                        }
+                    }
+                    unsafe {
+                        libc::close(pipe_fds[0]);
+                        libc::close(original_stdout);
+                        libc::close(original_stderr);
+                    }
+                });
+            } else {
+                // Просто перенаправляем stdout и stderr в файл
+                unsafe {
+                    if libc::dup2(console_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
+                        return Err(std::io::Error::last_os_error().into());
+                    }
+                    if libc::dup2(console_file.as_raw_fd(), libc::STDERR_FILENO) == -1 {
+                        return Err(std::io::Error::last_os_error().into());
+                    }
                 }
             }
             // Закрываем оригинальные дескрипторы файлов
@@ -129,7 +196,7 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
         }
         #[cfg(not(unix))]
         {
-            logger
+            let mut logger_builder = logger
                 .log_to_file(flexi_logger::FileSpec::default().directory(path))
                 .rotate(
                     flexi_logger::Criterion::Age(Age::Day),
@@ -157,8 +224,15 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                         text_2,
                         chrono::Local::now().format("%Y-%m-%dT%H:%M:%S")
                     )
-                })
-                .start()?;
+                });
+
+            // Для Windows: если нужно дублировать в консоль, оставляем duplicate_to_stderr
+            // Если не нужно - отключаем дублирование
+            if !duplicate_to_console {
+                logger_builder = logger_builder.duplicate_to_stderr(Duplicate::None);
+            }
+
+            logger_builder.start()?;
         }
     } else {
         logger.start()?;
