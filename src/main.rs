@@ -1,22 +1,17 @@
 use death_god_logging_tool::conflog;
 
 fn main() {
-    // Print logs
-    // let log_level = "error,death_god_logging_tool=debug";
-
-    // let log_path = "logs";
-    // conflog::init(log_level.to_string(), Some(log_path.to_string()));
-    println!("1");
+    println!("1 - вывод до инициализации логгера");
     conflog::init("trace".to_string(), Some("logs".to_string())).ok();
-    println!("2");
+    println!("2 - вывод после инициализации логгера");
 
-    log::trace!("ttt - записть в лог-файл");
-    println!("3");
+    log::trace!("ttt - запись в лог-файл");
+    println!("3 - обычный вывод между логами");
 
-    log::debug!("ddd - записть в лог-файл");
-    log::info!("i - записть в лог-файл");
-    log::warn!("w - записть в лог-файл");
-    log::error!("eee - записть в лог-файл");
+    log::debug!("ddd - запись в лог-файл");
+    log::info!("i - запись в лог-файл");
+    log::warn!("w - запись в лог-файл");
+    log::error!("eee - запись в лог-файл");
     println!("print line ...");
-    panic!("Паника!!!");
+    eprintln!("Это вывод в stderr");
 }

@@ -114,6 +114,8 @@ pub fn init(log_level: String, log_path: Option<String>) -> Result<(), Error> {
                 .open(&current_file)?;
 
             // Перенаправляем stdout и stderr в файл
+            // ВНИМАНИЕ: после этого весь вывод (println!, eprintln!, логи) будет идти только в файл
+            // Для дублирования вывода в консоль нужна дополнительная реализация
             unsafe {
                 if libc::dup2(console_file.as_raw_fd(), libc::STDOUT_FILENO) == -1 {
                     return Err(std::io::Error::last_os_error().into());
